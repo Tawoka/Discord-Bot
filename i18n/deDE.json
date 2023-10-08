@@ -1,0 +1,17 @@
+{
+  "coin": {
+    "command": {
+      "name": "werfen",
+      "description": "Wirft eine Münze für dich",
+      "option": {
+        "name": "münze",
+        "description": "Wähle den Typ der Münze aus",
+        "choices": ["Gold", "Silber"]
+      }
+    },
+    "output": {
+      "heads": "Du hast **Kopf** geworfen",
+      "tails": "Du hast **Zahl** geworfen"
+    }
+  }
+}

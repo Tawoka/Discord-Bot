@@ -1,0 +1,17 @@
+{
+  "coin": {
+    "command": {
+      "name": "toss",
+      "description": "Tosses a coin for you",
+      "option": {
+        "name": "coin",
+        "description": "Choose the type of coin",
+        "choices": ["gold", "silver"]
+      }
+    },
+    "output": {
+      "heads": "You've got **heads**",
+      "tails": "You've got **tails**"
+    }
+  }
+}
