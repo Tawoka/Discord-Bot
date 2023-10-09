@@ -5,6 +5,7 @@ const security = moduleLoader.utils.security();
 
 const messageTracker = require("./MessageTracker");
 const voiceTracker = require("./VoiceTracker");
+const userTracker = require("./UserTracker");
 const activityCompiler = require("./ActivityCompiler");
 const messageSpecification = require("./specification/MessageEventSpecification");
 const voiceSpecification = require("./specification/VoiceEventSpecification");
@@ -32,6 +33,7 @@ function clearCache(){
 }
 
 async function sendStatistics(){
+    return;
     const success = await activityCompiler.compile();
     if (success) {
         clearCache();
@@ -55,6 +57,7 @@ function handleMessageEvent(messageEvent) {
         logger.error("Received message originates from another server");
         return;
     }
+    userTracker.trackUser(messageEvent.author.id);
     messageTracker.handleMessageEvent(messageEvent);
     logger.info("Message received");
 }

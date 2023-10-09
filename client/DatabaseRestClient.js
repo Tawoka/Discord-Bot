@@ -25,6 +25,16 @@ async function getAllKnownUsers(){
     return axios.get(utils.buildSemperAPIUrl(GET_URL));
 }
 
+async function registerNewUser(user){
+    const POST_URL = "/user";
+    const data = {
+        id: user.user.id,
+        name: user.user.username,
+        displayName: user.nickname
+    };
+    return axios.post(utils.buildSemperAPIUrl(POST_URL), data);
+}
+
 const DatabaseRestClient = function () {
 
     axios.defaults.headers.common[process.env.API_TOKEN_HEADER] = process.env.API_ACCESS_TOKEN;
@@ -32,7 +42,8 @@ const DatabaseRestClient = function () {
     return {
         sendUserStats,
         sendChannelData,
-        getAllKnownUsers
+        getAllKnownUsers,
+        registerNewUser
     }
 
 }
