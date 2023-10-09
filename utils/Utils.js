@@ -32,7 +32,7 @@ module.exports = {
     },
 
     buildSemperAPIUrl(path) {
-        return  process.env.SEMPER_API_URL + path + "?accessToken=$" + process.env.SEMPER_API_ACCESS_TOKEN;
+        return  process.env.API_URL + path + "?accessToken=$" + process.env.API_ACCESS_TOKEN;
     }
 
 }

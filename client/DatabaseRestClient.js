@@ -21,11 +21,13 @@ async function sendChannelData(data){
 }
 
 async function getAllKnownUsers(){
-    const GET_URL = "/user" + process.env.serverId;
+    const GET_URL = "/user";
     return axios.get(utils.buildSemperAPIUrl(GET_URL));
 }
 
 const DatabaseRestClient = function () {
+
+    axios.defaults.headers.common[process.env.API_TOKEN_HEADER] = process.env.API_ACCESS_TOKEN;
 
     return {
         sendUserStats,
