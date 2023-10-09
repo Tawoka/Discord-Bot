@@ -10,6 +10,8 @@ global.moduleLoader = moduleLoader;
 const scriptLoader = require("./utils/ScriptLoader");
 const statsFeature = moduleLoader.features.userActivityTracking();
 
+const dataBootstrap = require("./bootstrap/LoadServerData")
+
 const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates]
 });
@@ -35,5 +37,7 @@ for (const eventObject of eventList){
 }
 
 client.login(token);
+
+dataBootstrap.loadUsers();
 
 statsFeature.init();
