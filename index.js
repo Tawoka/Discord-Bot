@@ -39,5 +39,6 @@ for (const eventObject of eventList){
 client.login(token);
 
 dataBootstrap.loadUsers();
+dataBootstrap.loadChannels();
 
 statsFeature.init();

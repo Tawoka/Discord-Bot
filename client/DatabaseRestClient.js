@@ -35,6 +35,22 @@ async function registerNewUser(user){
     return axios.post(utils.buildSemperAPIUrl(POST_URL), data);
 }
 
+async function getAllKnownChannels(){
+    const GET_URL = "/channel";
+    return axios.get(utils.buildSemperAPIUrl(GET_URL));
+}
+
+async function registerNewChannel(channel) {
+    const POST_URL = "/channel";
+    const data = {
+        id: channel.id,
+        name: channel.name,
+        categoryId: channel.parent
+    }
+    console.log(data);
+    console.log(channel);
+}
+
 const DatabaseRestClient = function () {
 
     axios.defaults.headers.common[process.env.API_TOKEN_HEADER] = process.env.API_ACCESS_TOKEN;
@@ -43,7 +59,9 @@ const DatabaseRestClient = function () {
         sendUserStats,
         sendChannelData,
         getAllKnownUsers,
-        registerNewUser
+        registerNewUser,
+        getAllKnownChannels,
+        registerNewChannel
     }
 
 }

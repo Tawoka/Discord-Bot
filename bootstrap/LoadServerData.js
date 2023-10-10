@@ -11,14 +11,23 @@ function loadUsers(){
         } else {
             global.userList = result.data;
         }
-    }).catch(error => {
-        logger.error(error);
-    });
+    }).catch(error => logger.error(error));
+}
+
+function loadChannels(){
+    client.getAllKnownChannels().then(result => {
+        if (utils.isEmpty(result.data)){
+            global.channelList = [];
+        } else {
+            global.channelList = result.data;
+        }
+    }).catch(error => logger.error(error));
 }
 
 function LoadServerData(){
     return {
-        loadUsers
+        loadUsers,
+        loadChannels
     }
 }
 
