@@ -6,6 +6,7 @@ const security = moduleLoader.utils.security();
 const messageTracker = require("./MessageTracker");
 const voiceTracker = require("./VoiceTracker");
 const userTracker = require("./UserTracker");
+const channelTracker = require("./ChannelTracker");
 const activityCompiler = require("./ActivityCompiler");
 const messageSpecification = require("./specification/MessageEventSpecification");
 const voiceSpecification = require("./specification/VoiceEventSpecification");
@@ -58,6 +59,7 @@ function handleMessageEvent(messageEvent) {
         return;
     }
     userTracker.trackUser(messageEvent.author.id);
+    channelTracker.trackChannel(messageEvent.channelId);
     messageTracker.handleMessageEvent(messageEvent);
     logger.info("Message received");
 }

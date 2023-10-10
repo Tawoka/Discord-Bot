@@ -12,7 +12,7 @@ function trackUser(userId) {
     if (!userList.includes(userId)){
         logger.info("New user registered");
         loadUserFromDiscord(userId).then(user => {
-            apiClient.registerNewUser(user).then(() => {}).catch(error => logger.error(error));
+            apiClient.registerNewUser(user).then(() => userList.push(userId)).catch(error => logger.error(error));
         });
     }
 }

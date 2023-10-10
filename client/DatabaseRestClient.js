@@ -45,10 +45,9 @@ async function registerNewChannel(channel) {
     const data = {
         id: channel.id,
         name: channel.name,
-        categoryId: channel.parent
+        categoryId: channel.parentId
     }
-    console.log(data);
-    console.log(channel);
+    return axios.post(utils.buildSemperAPIUrl(POST_URL), data);
 }
 
 const DatabaseRestClient = function () {
