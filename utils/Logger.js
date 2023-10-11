@@ -32,7 +32,7 @@ function trace(message){
 }
 
 function bot(message) {
-    client.channels.fetch(process.env.SEMPER_LOG_CHANNEL).then(channel => {
+    client.channels.fetch(process.env.LOG_CHANNEL).then(channel => {
         channel.send(message);
     });
 }

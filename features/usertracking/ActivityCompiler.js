@@ -104,28 +104,6 @@ function buildStatisticObject(messageData, voiceData){
     return data;
 }
 
-async function buildChannelData(channelList){
-    const guild = await client.guilds.fetch(process.env.serverId);
-    let data = [];
-    for (let channelId of channelList){
-        let channel = guild.channels.cache.get(channelId);
-        data.push({
-            discordChannelId: channelId,
-            discordChannelParentId: channel.parent.id,
-            discordChannelName: channel.name
-        });
-    }
-    return data;
-}
-
-function retrieveChannelList(dataArray){
-    const channelSet = new Set();
-    for (let dataEntry of dataArray){
-        channelSet.add(dataEntry.discordChannelId);
-    }
-    return [...channelSet];
-}
-
 function resend(data) {
     logger.bot(`Attempting another call in 30 minutes`);
     setTimeout(() => {
@@ -174,16 +152,12 @@ async function compile() {
     const messageData = messageTracker.getData();
     const stats = buildStatisticObject(messageData, voiceData);
 
-    const channelList = retrieveChannelList(stats);
-    const channelData = await buildChannelData(channelList);
-
     try {
         attemptRetry = true;
-        await databaseClient.sendChannelData(channelData);
         const response = await databaseClient.sendUserStats(stats);
 
-        if (response.data.statusId === 1){
-            logger.info(response);
+        if (response.data.statusId == null || response.data.statusId === 1){
+            logger.debug(response);
             logger.bot(`Tracking data has been sent. A total of ${countTotalMessages(stats)} messages, and a total of ${countTotalTimeInVoice(stats)} voice seconds have been recorded.`);
             return true;
         }else {

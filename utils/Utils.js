@@ -33,6 +33,10 @@ module.exports = {
 
     buildSemperAPIUrl(path) {
         return  process.env.API_URL + path + "?accessToken=$" + process.env.API_ACCESS_TOKEN;
+    },
+
+    buildSemperAPIUrlWithServerId(path){
+        return this.buildSemperAPIUrl(path + "/" + process.env.serverId)
     }
 
 }

@@ -11,7 +11,8 @@ const activityCompiler = require("./ActivityCompiler");
 const messageSpecification = require("./specification/MessageEventSpecification");
 const voiceSpecification = require("./specification/VoiceEventSpecification");
 
-let hourOfLastCall = new Date().getHours();
+//TODO switch to hours later
+let hourOfLastCall = new Date().getMinutes();
 let statisticsAreTransmitted = false;
 let messageEvents = [];
 let voiceEvents = [];
@@ -34,7 +35,6 @@ function clearCache(){
 }
 
 async function sendStatistics(){
-    return;
     const success = await activityCompiler.compile();
     if (success) {
         clearCache();
