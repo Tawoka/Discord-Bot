@@ -19,11 +19,15 @@ function parseTimeIntoSeconds(time){
     return time / 1000;
 }
 
+function addTimeSinceLastUpdateToVoiceCounter(activity, currentChannel) {
+    activity.channels[currentChannel] += Date.now() - activity.state.lastVoiceUpdate;
+}
+
 function handleOngoingVoiceActivity(voiceData){
     for (let activity of Object.values(voiceData)){
         let currentChannel = activity.state.currentVoiceChannel;
         if (currentChannel != null){
-            activity.channels[currentChannel] += Date.now() - activity.state.lastVoiceUpdate;
+            addTimeSinceLastUpdateToVoiceCounter(activity, currentChannel);
         }
     }
 }
@@ -36,72 +40,71 @@ function buildChannelList(messageChannels, voiceChannels){
     return utils.merge(Object.keys(messageChannels), Object.keys(voiceChannels));
 }
 
-function mergeDataForUser(userId, messageData, voiceData) {
+function voiceAndMessageDataFound(voiceEntry, channelId, messageEntry) {
+    return voiceEntry[channelId] != null && messageEntry[channelId] != null;
+}
+
+function messageDataFound(messageEntry, channelId) {
+    return messageEntry[channelId] != null;
+}
+
+function voiceDataFound(voiceEntry, channelId) {
+    return voiceEntry[channelId] != null;
+}
+
+function createFullEntry(userId, channelId, messageCount, voiceCount) {
+    return {
+        userDiscordId: userId,
+        discordChannelId: channelId,
+        messageCount: messageCount,
+        voiceActivity: voiceCount
+    };
+}
+
+function createMessageEntry(userId, channelId, messageCount) {
+    return createFullEntry(userId, channelId, messageCount, null);
+}
+
+function createVoiceEntry(userId, channelId, voiceCount) {
+    return createFullEntry(userId, channelId, null, voiceCount);
+}
+
+function buildDataObject(channelList, voiceEntry, messageEntry, userId) {
     let data = [];
-    const messageEntry = messageData[userId];
-    const voiceEntry = voiceData[userId];
-    const channelList = buildChannelList(messageEntry.channels, voiceEntry.channels);
     for (let channelId of channelList) {
-        if (voiceEntry[channelId] != null && messageEntry[channelId] != null) {
-            let entry = {
-                userDiscordId: userId,
-                discordChannelId: channelId,
-                messageCount: messageEntry[channelId],
-                voiceActivity: parseTimeIntoSeconds(voiceEntry[channelId])
-            }
+        if (voiceAndMessageDataFound(voiceEntry, channelId, messageEntry)) {
+            const entry= createFullEntry(userId, channelId, messageEntry[channelId], parseTimeIntoSeconds(voiceEntry[channelId]));
             data.push(entry);
-        } else if (messageEntry[channelId] != null) {
-            let entry = {
-                userDiscordId: userId,
-                discordChannelId: channelId,
-                messageCount: messageEntry[channelId],
-                voiceActivity: null
-            }
+        } else if (messageDataFound(messageEntry, channelId)) {
+            const entry= createMessageEntry(userId, channelId, messageEntry[channelId]);
             data.push(entry);
-        } else {
-            let entry = {
-                userDiscordId: userId,
-                discordChannelId: channelId,
-                messageCount: null,
-                voiceActivity: parseTimeIntoSeconds(voiceEntry[channelId])
-            }
+        } else if (voiceDataFound(voiceEntry, channelId)){
+            const entry= createVoiceEntry(userId, channelId, parseTimeIntoSeconds(voiceEntry[channelId]));
             data.push(entry);
         }
     }
     return data;
 }
 
-function buildStatisticObject(messageData, voiceData){
-    const data = [];
-    const userList = buildUserList(messageData, voiceData);
-    for (let userId of userList){
-        if (voiceData[userId] != null && messageData[userId] != null){
-            let userData = mergeDataForUser(userId, messageData, voiceData);
-            data.concat(userData);
-        } else if (messageData[userId] != null){
-            const messageEntry = messageData[userId];
-            for (let channelId in messageEntry.channels){
-                data.push({
-                    userDiscordId: userId,
-                    discordChannelId: channelId,
-                    messageCount: messageEntry.channels[channelId],
-                    voiceActivity: null
-                });
-            }
-        } else {
-            const voiceEntry = voiceData[userId];
-            for (let channelId in voiceEntry.channels){
-                data.push({
-                    userDiscordId: userId,
-                    discordChannelId: channelId,
-                    messageCount: null,
-                    voiceActivity: parseTimeIntoSeconds(voiceEntry.channels[channelId])
-                });
-            }
-        }
-    }
+function mergeDataForUser(userId, messageData, voiceData) {
+    const messageEntry = messageData[userId];
+    const voiceEntry = voiceData[userId];
+    const channelList = buildChannelList(messageEntry.channels, voiceEntry.channels);
+    return buildDataObject(channelList, voiceEntry, messageEntry, userId);
+}
 
+function buildStatisticObject(userList, messageData, voiceData) {
+    const data = [];
+    for (let userId of userList) {
+        let userData = mergeDataForUser(userId, messageData, voiceData);
+        data.concat(userData);
+    }
     return data;
+}
+
+function buildUserStatisticObject(messageData, voiceData){
+    const userList = buildUserList(messageData, voiceData);
+    return buildStatisticObject(userList, messageData, voiceData);
 }
 
 function resend(data) {
@@ -146,24 +149,38 @@ function countTotalTimeInVoice(stats){
     return count;
 }
 
-async function compile() {
+function createStatistics() {
     const voiceData = voiceTracker.getData();
     handleOngoingVoiceActivity(voiceData);
     const messageData = messageTracker.getData();
-    const stats = buildStatisticObject(messageData, voiceData);
+    return buildUserStatisticObject(messageData, voiceData);
+}
 
+function callSuccessful(response) {
+    return response.data.statusId === 1;
+}
+
+function createDiscordNotification(stats) {
+    logger.bot(`Tracking data has been sent. A total of ${countTotalMessages(stats)} messages, and a total of ${countTotalTimeInVoice(stats)} voice seconds have been recorded.`);
+}
+
+function handleResponse(response, stats) {
+    if (callSuccessful(response)) {
+        logger.debug(response);
+        createDiscordNotification(stats);
+        return true;
+    } else {
+        callFailed(response, stats);
+        return false;
+    }
+}
+
+async function compile() {
+    const stats = createStatistics();
     try {
         attemptRetry = true;
         const response = await databaseClient.sendUserStats(stats);
-
-        if (response.data.statusId == null || response.data.statusId === 1){
-            logger.debug(response);
-            logger.bot(`Tracking data has been sent. A total of ${countTotalMessages(stats)} messages, and a total of ${countTotalTimeInVoice(stats)} voice seconds have been recorded.`);
-            return true;
-        }else {
-            callFailed(response, stats);
-            return false;
-        }
+        return handleResponse(response, stats);
     } catch (error) {
         callFailed(error, stats);
         return false;
@@ -173,6 +190,9 @@ async function compile() {
 function ActivityCompiler() {
 
     return {
+        /**
+         * Compiles the data for the server from the individual trackers.
+         */
         compile
     }
 

@@ -1,6 +1,7 @@
 "use strict";
 
 const logger = moduleLoader.utils.logger();
+
 const security = moduleLoader.utils.security();
 
 const messageTracker = require("./MessageTracker");
@@ -11,42 +12,30 @@ const activityCompiler = require("./ActivityCompiler");
 const messageSpecification = require("./specification/MessageEventSpecification");
 const voiceSpecification = require("./specification/VoiceEventSpecification");
 
-//TODO switch to hours later
-let hourOfLastCall = new Date().getMinutes();
+let hourOfLastCall = new Date().getHours();
 let statisticsAreTransmitted = false;
 let messageEvents = [];
 let voiceEvents = [];
 
-function init(){
-    client.guilds.fetch(process.env.serverId)
-        .then(guild => {
-            logger.debug(guild.channels);
-        })
-        .catch(error => {
-            logger.error("Initializing VoiceTracking failed");
-            logger.error(error);
-        });
-}
-
-function clearCache(){
+function clearCache() {
     messageTracker.resetCounters();
     voiceTracker.resetCounters();
     logger.info("clearing cache");
 }
 
-async function sendStatistics(){
+async function sendStatistics() {
     const success = await activityCompiler.compile();
     if (success) {
         clearCache();
     }
 }
 
-function isNewHour(){
+function isNewHour() {
     let currentHour = new Date().getMinutes();
     return hourOfLastCall !== currentHour;
 }
 
-function updateHourOfLastCall(){
+function updateHourOfLastCall() {
     hourOfLastCall = new Date().getMinutes();
 }
 
@@ -55,7 +44,7 @@ function handleMessageEvent(messageEvent) {
         return;
     }
     if (!security.isConnectedServer(messageEvent.guildId)) {
-        logger.error("Received message originates from another server");
+        logger.info("Received message originates from another server");
         return;
     }
     userTracker.trackUser(messageEvent.author.id);
@@ -70,32 +59,35 @@ function handleVoiceEvent(oldMember, newMember) {
         return;
     }
     if (!security.isConnectedServer(newMember.guild.id)) {
-        logger.error("Received voice event originates from another server");
+        logger.info("Received voice event originates from another server");
         return;
     }
+    userTracker.trackUser(newMember.id);
+    channelTracker.trackChannel(newMember.channelId);
     voiceTracker.handleVoiceEvent(oldMember, newMember);
 }
 
-async function handleAPICallAfterMessageEvent() {
+async function performUploadProcess() {
     statisticsAreTransmitted = true;
     await sendStatistics();
     statisticsAreTransmitted = false;
-    await messageEvents.forEach(registerMessage);
-    messageEvents = [];
-    updateHourOfLastCall();
 }
 
-async function handleAPICallAfterVoiceEvent() {
-    statisticsAreTransmitted = true;
-    await sendStatistics();
-    statisticsAreTransmitted = false;
+async function executeCachedEvents() {
+    await messageEvents.forEach(registerMessage);
+    messageEvents = [];
     await voiceEvents.forEach(entry => registerVoiceUpdate(entry[0], entry[1]));
     voiceEvents = [];
+}
+
+async function handleAPICall() {
+    await performUploadProcess();
+    await executeCachedEvents();
     updateHourOfLastCall();
 }
 
 async function registerMessage(messageEvent) {
-    if (statisticsAreTransmitted){
+    if (statisticsAreTransmitted) {
         messageEvents.push(messageEvent);
         return;
     }
@@ -103,12 +95,13 @@ async function registerMessage(messageEvent) {
     if (!isNewHour()) {
         handleMessageEvent(messageEvent);
     } else {
-        await handleAPICallAfterMessageEvent();
+        messageEvents.push(messageEvent);
+        await handleAPICall();
     }
 }
 
 async function registerVoiceUpdate(oldMember, newMember) {
-    if (statisticsAreTransmitted){
+    if (statisticsAreTransmitted) {
         voiceEvents.push([oldMember, newMember]);
         return;
     }
@@ -116,15 +109,23 @@ async function registerVoiceUpdate(oldMember, newMember) {
     if (!isNewHour()) {
         handleVoiceEvent(oldMember, newMember);
     } else {
-        await handleAPICallAfterVoiceEvent();
+        voiceEvents.push([oldMember, newMember]);
+        await handleAPICall();
     }
 }
 
-const UserActivityTracking = function (){
+const UserActivityTracking = function () {
 
     return {
-        init,
+        /**
+         * Register any new message that was written on the server. All message events get here, but have to pass the
+         * checks to be parsed.
+         */
         registerMessage,
+        /**
+         * Register any change in a users Voice State on the server. All voice events get here, but have to pass the
+         * checks to be parsed.
+         */
         registerVoiceUpdate
     }
 

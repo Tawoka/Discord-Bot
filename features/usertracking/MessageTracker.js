@@ -27,15 +27,24 @@ function registerValidMessage(messageEvent) {
     activity.state.lastMessageTimestamp = messageEvent.createdTimestamp;
 }
 
-function handleMessageEvent(messageEvent) {
-    const userId = messageEvent.author.id;
+function handleNewUser(userId) {
     if (activityMap[userId] == null) {
         activityMap[userId] = new Activity();
-    } else if (spamSpecification.isSatisfiedBy(messageEvent.createdTimestamp,
-        activityMap[userId].state.lastMessageTimestamp)) {
-        return;
     }
-    registerValidMessage(messageEvent);
+}
+
+function spamDetected(messageEvent, userId){
+    const messageTimestamp = messageEvent.createdTimestamp;
+    const lastMessageTimestamp = activityMap[userId].state.lastMessageTimestamp;
+    return spamSpecification.isSatisfiedBy(messageTimestamp, lastMessageTimestamp);
+}
+
+function handleMessageEvent(messageEvent) {
+    const userId = messageEvent.author.id;
+    handleNewUser(userId);
+    if (!spamDetected(messageEvent, userId)){
+        registerValidMessage(messageEvent);
+    }
 }
 
 function getData(){
@@ -52,8 +61,19 @@ function resetCounters(){
 function MessageTracker() {
 
     return{
+        /**
+         * This function parses the given message event.
+         * It will create a map entry for the combination of userId and channelId, if it does not already exist
+         * For each message created, the map entry will increase its value by 1
+         */
         handleMessageEvent,
+        /**
+         * Retrieve the data from this tracker, so it can be sent to the server.
+         */
         getData,
+        /**
+         * Reset the data in the tracker, but not the cache itself, so we don't lose the users themselves.
+         */
         resetCounters
     }
 
