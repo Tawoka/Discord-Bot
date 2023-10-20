@@ -2,11 +2,19 @@
   "compilerOptions": {
     "outDir": "./built",
     "allowJs": true,
-    "target": "es6",
+    "target": "es2020",
+    "module": "CommonJS",
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "alwaysStrict": true,
-    "noUnusedLocals": true,
+    "sourceMap": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    //    "noUnusedLocals": true,
     "pretty": true
   },
   "include": ["./src/**/*"]

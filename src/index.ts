@@ -1,17 +1,30 @@
-"use strict";
-require("dotenv").config();
+import "./utils/ModuleLoader";
+import {Client, GatewayIntentBits} from "discord.js";
+import {ModuleLoader} from "./utils/ModuleLoader";
 
-const { Client, GatewayIntentBits, Collection } = require("discord.js");
+const client = new Client({
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates]
+});
+console.log(client);
+ModuleLoader.getModule("userActivityTracking");
+// global.moduleLoader = moduleLoader;
+
+/*
+import * as moduleLoader from "./utils/ModuleLoader";
+
+import {Client, Collection, GatewayIntentBits} from "discord.js";
+
+import * as scriptLoader from "./utils/ScriptLoader";
+
+import * as dataBootstrap from "./bootstrap/LoadServerData";
+
+import * as dotenv from "dotenv";
+dotenv.config();
+
+
 const token = process.env.token;
-
-const moduleLoader = require("./utils/ModuleLoader");
 global.moduleLoader = moduleLoader;
-
-const scriptLoader = require("./utils/ScriptLoader");
 const statsFeature = moduleLoader.features.userActivityTracking();
-
-const dataBootstrap = require("./bootstrap/LoadServerData")
-
 const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates]
 });
@@ -42,3 +55,4 @@ dataBootstrap.loadUsers();
 dataBootstrap.loadChannels();
 
 statsFeature.init();
+*/

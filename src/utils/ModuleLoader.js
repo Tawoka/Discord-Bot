@@ -1,15 +1,16 @@
+/*
 "use strict";
 
 const BASE_PATH = "./../";
 
-/**
+/!**
  * One weakness of NodeJS, compared to languages like Java or C#, is the lack of proper import support. Their require()
  * is slick for their own modules, but becomes cumbersome, when we use our own modules. The need to have relative paths
  * from the file we require in, tempts us to use shallow packaging, leading to less structured projects.
  *
  * To combat this, the ModuleLoader takes over that task. Anything requiring another module can leverage this loader,
  * to grab said module, without worrying about relative paths.
- */
+ *!/
 module.exports = {
 
     features: {
@@ -58,4 +59,4 @@ module.exports = {
         }
     }
 
-}
+}*/
