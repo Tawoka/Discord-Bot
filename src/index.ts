@@ -1,16 +1,31 @@
 import "./utils/ModuleLoader";
-import {Client, GatewayIntentBits} from "discord.js";
-import {ModuleLoader} from "./utils/ModuleLoader";
+import {Client, Collection, GatewayIntentBits} from "discord.js";
+import * as dotenv from "dotenv";
+import {ScriptLoader} from "./utils/ScriptLoader";
+import {CommandObject, EventObject} from "./specifications/SpecificationObjects";
+
+dotenv.config();
+
+const token = process.env.token;
 
 const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates]
 });
-console.log(client);
-ModuleLoader.getModule("userActivityTracking");
-// global.moduleLoader = moduleLoader;
+
+// @ts-ignore
+this.client = client;
+
+const scriptLoader = new ScriptLoader();
+const eventList = scriptLoader.loadEvents(__dirname);
+for (const eventObject of eventList){
+    if (eventObject.once) {
+        client.once(eventObject.name, (...args) => eventObject.execute(...args));
+    } else {
+        client.on(eventObject.name, (...args) => eventObject.execute(...args));
+    }
+}
 
 /*
-import * as moduleLoader from "./utils/ModuleLoader";
 
 import {Client, Collection, GatewayIntentBits} from "discord.js";
 
