@@ -15,11 +15,11 @@ const userIsNotMutedSpecification = require("./specification/UserNotMutedSpecifi
  *   Key 1: State
  *   Value 1: State Object
  *   Key 2: Channels
- *   Value 2: Channel Object
+ *   Value 2: Channels Object
  *
- * Channel
+ * Channels
  *   Type: Object (Dynamic Structure)
- *   Keys: Channel ID
+ *   Keys: Channels ID
  *   Values: Time spent in channel
  */
 let activityMap = {};
