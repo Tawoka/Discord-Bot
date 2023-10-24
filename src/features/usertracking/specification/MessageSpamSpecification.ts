@@ -19,6 +19,4 @@ export class MessageSpamSpecification implements Specification {
         return "MessageSpamSpecification";
     }
 
-
-
 }
