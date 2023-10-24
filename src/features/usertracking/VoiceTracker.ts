@@ -2,10 +2,11 @@ import {VoiceState} from "discord.js";
 import {Logger} from "../../utils/Logger";
 import {UserNotMutedSpecification} from "./specification/UserNotMutedSpecification";
 import {Discord} from "../../cache/Discord";
+import {VoiceActivity, VoiceActivityMap} from "../../@types/types";
 
 export class VoiceTracker {
 
-    private activityMap: ActivityMap = {};
+    private activityMap: VoiceActivityMap = {};
 
     public handleVoiceEvent(oldMember: VoiceState, newMember: VoiceState): void {
 
@@ -125,7 +126,7 @@ export class VoiceTracker {
         }
     }
 
-    private initializeActivity(): Activity{
+    private initializeActivity(): VoiceActivity{
         return {
             state: {
                 lastVoiceUpdate: Date.now(),
@@ -149,21 +150,4 @@ export class VoiceTracker {
         }
     }
 
-}
-
-
-type Activity = {
-    state: {
-        lastVoiceUpdate: number,
-        currentVoiceChannel: string
-    },
-    channels: ChannelMap
-}
-
-type ChannelMap = {
-    [key: string]: number
-}
-
-type ActivityMap = {
-    [key: string]: Activity
 }

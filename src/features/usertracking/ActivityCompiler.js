@@ -62,7 +62,7 @@ function createFullEntry(userId, channelId, messageCount, voiceCount) {
 }
 
 function createMessageEntry(userId, channelId, messageCount) {
-    return createFullEntry(userId, channelId, messageCount, null);
+    return createFullEntry(userId, channelId, messageCount, 0);
 }
 
 function createVoiceEntry(userId, channelId, voiceCount) {

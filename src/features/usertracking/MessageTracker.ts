@@ -1,9 +1,10 @@
 import {Message} from "discord.js";
 import { MessageSpamSpecification } from "./specification/MessageSpamSpecification";
+import {MessageActivity, MessageActivityMap} from "../../@types/types";
 
 export class MessageTracker {
 
-    private activityMap: ActivityMap = {};
+    private activityMap: MessageActivityMap = {};
 
     public handleMessageEvent(messageEvent: Message) {
         const userId = messageEvent.author.id;
@@ -34,7 +35,7 @@ export class MessageTracker {
         return spamSpecification.isSatisfiedBy(messageTimestamp);
     }
 
-    private initializeActivity(): Activity{
+    private initializeActivity(): MessageActivity{
         return {
             state: {
                 lastMessageTimestamp: Date.now()
@@ -54,7 +55,7 @@ export class MessageTracker {
     }
 
     public resetCounters(){
-        const activities: Activity[] = Object.values(this.activityMap);
+        const activities: MessageActivity[] = Object.values(this.activityMap);
         for (let activity of activities){
             activity.channels = {};
         }
@@ -62,17 +63,3 @@ export class MessageTracker {
 
 }
 
-type Activity = {
-    state: {
-        lastMessageTimestamp: number
-    },
-    channels: ChannelMap
-}
-
-type ChannelMap = {
-    [key: string]: number
-}
-
-type ActivityMap = {
-    [key: string]: Activity
-}
