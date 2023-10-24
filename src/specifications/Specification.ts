@@ -1,8 +1,8 @@
-import {CommandObject, EventObject} from "./SpecificationObjects";
+import {BotEvent, SlashCommand} from "../@types/discord";
 
 export interface Specification {
 
-    isSatisfiedBy(args: EventObject | CommandObject): boolean,
+    isSatisfiedBy(args: BotEvent | SlashCommand): boolean,
 
     get name(): string
 

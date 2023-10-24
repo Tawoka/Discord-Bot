@@ -1,23 +1,19 @@
-"use strict";
+import {
+    ChatInputCommandInteraction,
+    SlashCommandBuilder
+} from "discord.js";
+import {TextLoader} from "../utils/TextLoader";
+import {CoinTossController} from "../features/headsandtails/CoinTossController";
+import {SlashCommand} from "../@types/discord";
 
-const {SlashCommandBuilder} = require("discord.js");
-
-const controller = moduleLoader.features.coinToss();
-const textLoader = moduleLoader.utils.textLoader();
-
+const textLoader = new TextLoader();
 const english = textLoader.english.coin.command;
 const german = textLoader.german.coin.command;
 
-module.exports = {
-    data: new SlashCommandBuilder()
-        .setName(english.name)
-        .setNameLocalizations({
-            de: german.name
-        })
-        .setDescription(english.description)
-        .setDescriptionLocalizations({
-            de: german.description
-        })
+const controller = new CoinTossController();
+
+const slashCommand: SlashCommand = {
+    command: new SlashCommandBuilder()
         .addStringOption(option =>
             option
                 .setName(english.option.name)
@@ -46,10 +42,20 @@ module.exports = {
                     }
                 )
         )
+        .setName(english.name)
+        .setNameLocalizations({
+            de: german.name
+        })
+        .setDescription(english.description)
+        .setDescriptionLocalizations({
+            de: german.description
+        })
     ,
-    async execute(interaction) {
+    async execute(interaction: ChatInputCommandInteraction) {
         const coinType = interaction.options.getString(english.option.name);
         const result = controller.toss(coinType, interaction.locale);
-        interaction.reply({embeds: [result]});
-    },
-};
+        await interaction.reply({embeds: [result]});
+    }
+}
+
+export default slashCommand;

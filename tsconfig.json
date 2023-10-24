@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "./built",
+    "typeRoots": ["src/@types", "node_modules/@types"],
     "allowJs": true,
     "target": "es2020",
     "module": "CommonJS",
@@ -17,5 +18,5 @@
     //    "noUnusedLocals": true,
     "pretty": true
   },
-  "include": ["./src/**/*"]
+  "include": ["./src/**/*"],
 }

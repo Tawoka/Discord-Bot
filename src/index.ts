@@ -1,10 +1,10 @@
-import "./utils/ModuleLoader";
 import {Client, Collection, GatewayIntentBits} from "discord.js";
-import * as dotenv from "dotenv";
+import {config} from "dotenv";
 import {ScriptLoader} from "./utils/ScriptLoader";
-import {CommandObject, EventObject} from "./specifications/SpecificationObjects";
+import {SlashCommand} from "./@types/discord";
 
-dotenv.config();
+config({path: __dirname + '/.env'});
+console.log(__dirname + "/.env");
 
 const token = process.env.token;
 
@@ -12,18 +12,28 @@ const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates]
 });
 
-// @ts-ignore
-this.client = client;
+/*// @ts-ignore
+this.client = client;*/
+
+client.commands = new Collection<string, SlashCommand>();
 
 const scriptLoader = new ScriptLoader();
-const eventList = scriptLoader.loadEvents(__dirname);
+
+const commandList = scriptLoader.loadCommands(__dirname);
+for (const commandObject of commandList) {
+    client.commands.set(commandObject.command.name, commandObject);
+}
+
+/*const eventList = scriptLoader.loadEvents(__dirname);
 for (const eventObject of eventList){
     if (eventObject.once) {
         client.once(eventObject.name, (...args) => eventObject.execute(...args));
     } else {
         client.on(eventObject.name, (...args) => eventObject.execute(...args));
     }
-}
+}*/
+
+client.login(token).then();
 
 /*
 
