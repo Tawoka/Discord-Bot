@@ -1,16 +1,13 @@
-"use strict";
+import {BotEvent} from "../@types/discord";
+import {Events} from "discord.js";
 
-const {Events} = require('discord.js');
-
-// const statistics = moduleLoader.features.userActivityTracking();
-// const logger = moduleLoader.utils.logger();
-
-module.exports = {
+const event: BotEvent = {
     name: Events.VoiceStateUpdate,
     once: false,
     async execute(oldMember, newMember) {
         // logger.info("Voice event received");
         // await statistics.registerVoiceUpdate(oldMember, newMember);
     }
-
 }
+
+export default event;

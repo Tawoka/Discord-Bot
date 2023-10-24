@@ -12,9 +12,6 @@ const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates]
 });
 
-/*// @ts-ignore
-this.client = client;*/
-
 client.commands = new Collection<string, SlashCommand>();
 
 const scriptLoader = new ScriptLoader();
@@ -24,14 +21,14 @@ for (const commandObject of commandList) {
     client.commands.set(commandObject.command.name, commandObject);
 }
 
-/*const eventList = scriptLoader.loadEvents(__dirname);
+const eventList = scriptLoader.loadEvents(__dirname);
 for (const eventObject of eventList){
     if (eventObject.once) {
         client.once(eventObject.name, (...args) => eventObject.execute(...args));
     } else {
         client.on(eventObject.name, (...args) => eventObject.execute(...args));
     }
-}*/
+}
 
 client.login(token).then();
 

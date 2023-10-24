@@ -1,8 +1,7 @@
-"use strict";
+import {BotEvent} from "../@types/discord";
+import {Events} from "discord.js";
 
-const { Events } = require('discord.js');
-
-module.exports = {
+const event: BotEvent = {
     name: Events.InteractionCreate,
     once: false,
     async execute(interaction) {
@@ -20,5 +19,7 @@ module.exports = {
             console.error(`Error executing ${interaction.commandName}`);
             console.error(error);
         }
-    },
-};
+    }
+}
+
+export default event;
