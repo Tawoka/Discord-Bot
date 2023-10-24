@@ -4,4 +4,6 @@ export class Discord {
 
     public static client: Client;
 
+    public static readonly startupTime: number = Date.now();
+
 }
