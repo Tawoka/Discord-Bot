@@ -1,4 +1,4 @@
-import axios from "axios/index";
+import axios from "axios";
 import {GuildBasedChannel, GuildMember} from "discord.js";
 import {Utils} from "../utils/Utils";
 

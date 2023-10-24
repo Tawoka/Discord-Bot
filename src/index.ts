@@ -2,9 +2,12 @@ import {Client, Collection, GatewayIntentBits} from "discord.js";
 import {config} from "dotenv";
 import {ScriptLoader} from "./utils/ScriptLoader";
 import {SlashCommand} from "./@types/discord";
+import {LoadServerData} from "./bootstrap/LoadServerData";
+import {Discord} from "./cache/Discord";
+import axios from "axios";
 
 config({path: __dirname + '/.env'});
-console.log(__dirname + "/.env");
+axios.defaults.headers.common[`${process.env.API_TOKEN_HEADER}`] = process.env.API_ACCESS_TOKEN;
 
 const token = process.env.token;
 
@@ -13,6 +16,7 @@ const client = new Client({
 });
 
 client.commands = new Collection<string, SlashCommand>();
+Discord.client = client;
 
 const scriptLoader = new ScriptLoader();
 
@@ -31,6 +35,9 @@ for (const eventObject of eventList){
 }
 
 client.login(token).then();
+
+LoadServerData.loadUsers();
+LoadServerData.loadChannels();
 
 /*
 

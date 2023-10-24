@@ -1,7 +1,6 @@
-import {globalThis} from "../@types/global";
-import client = globalThis.client;
 import {ChannelType} from "discord-api-types/v10";
 import {TextChannel} from "discord.js";
+import {Discord} from "../cache/Discord";
 
 const logLevel: number = process.env.logLevel != null ? +process.env.logLevel : 1;
 
@@ -37,7 +36,7 @@ export class Logger {
 
     public static bot(message: string) {
         if (process.env.LOG_CHANNEL != null) {
-            client.channels.fetch(process.env.LOG_CHANNEL).then(channel => {
+            Discord.client.channels.fetch(process.env.LOG_CHANNEL).then(channel => {
                 if (channel != null && channel.type == ChannelType.GuildText) {
                     const textChannel = channel as TextChannel;
                     textChannel.send(message).then();
