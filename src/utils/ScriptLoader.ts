@@ -1,9 +1,9 @@
 import path from "path";
 import fs from "fs";
-import {Specification} from "../specifications/Specification";
 import {EventSpecification} from "../specifications/EventSpecification";
 import {CommandSpecification} from "../specifications/CommandSpecification";
 import {BotEvent, SlashCommand} from "../@types/discord";
+import {Specification} from "../@types/interfaces";
 
 export class ScriptLoader {
 

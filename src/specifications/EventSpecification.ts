@@ -1,5 +1,5 @@
-import {Specification} from "./Specification";
 import {BotEvent} from "../@types/discord";
+import {Specification} from "../@types/interfaces";
 
 export class EventSpecification implements Specification {
 

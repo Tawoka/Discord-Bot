@@ -1,5 +1,5 @@
-import {Specification} from "./Specification";
 import {SlashCommand} from "../@types/discord";
+import {Specification} from "../@types/interfaces";
 
 export class CommandSpecification implements Specification {
     public isSatisfiedBy(command: SlashCommand): boolean {
