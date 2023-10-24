@@ -22,7 +22,6 @@ export class UserActivityTracking {
 
     private statisticsAreTransmitted = false;
     private messageEvents: Message[] = [];
-    //TODO check the proper typing later
     private voiceEvents: any[] = [];
     private hourOfLastCall: number = 0;
 
