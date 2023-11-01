@@ -83,6 +83,9 @@ export class ActivityCompiler {
     }
 
     private addTimeSinceLastUpdateToVoiceCounter(activity: VoiceActivity, currentChannel: string) {
+        if (activity.channels[currentChannel] == null){
+            activity.channels[currentChannel] = 0;
+        }
         activity.channels[currentChannel] += Date.now() - activity.state.lastVoiceUpdate;
     }
 
@@ -120,7 +123,7 @@ export class ActivityCompiler {
         if (!time) {
             return 0;
         }
-        return time / 1000;
+        return Math.floor(time / 1000);
     }
 
     private messageDataFound(messageEntry: MessageActivity, channelId: string) {
@@ -159,18 +162,6 @@ export class ActivityCompiler {
         }
         return data;
     }
-
-    /*private getChannelList(messageEntry: MessageActivity | null, voiceEntry: VoiceActivity | null): string[] {
-        if (messageEntry != null && voiceEntry != null){
-           return this.buildChannelList(messageEntry.channels, voiceEntry.channels);
-        } else if (messageEntry != null){
-            return Object.keys(messageEntry.channels);
-        } else if (voiceEntry != null){
-            return Object.keys(voiceEntry.channels);
-        } else {
-            return [];
-        }
-    }*/
 
     private mergeDataForUser(userId: string, messageData: MessageActivityMap, voiceData: VoiceActivityMap) {
         const messageEntry = messageData[userId] ? messageData[userId] : MessageTracker.EMPTY_MESSAGE_ACTIVITY;

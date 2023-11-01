@@ -81,6 +81,7 @@ export class UserActivityTracking {
 
     private static getCurrentHour(){
         return new Date().getMinutes();
+        // return new Date().getHours();
     }
 
     private handleMessageEvent(messageEvent: Message) {
