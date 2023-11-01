@@ -4,7 +4,9 @@ import {MessageActivity, MessageActivityMap} from "../../@types/types";
 
 export class MessageTracker {
 
-    private activityMap: MessageActivityMap = {};
+    public static readonly EMPTY_MESSAGE_ACTIVITY: MessageActivity = MessageTracker.initializeActivity();
+
+    private static activityMap: MessageActivityMap = {};
 
     public handleMessageEvent(messageEvent: Message) {
         const userId = messageEvent.author.id;
@@ -16,7 +18,7 @@ export class MessageTracker {
 
     private registerValidMessage(messageEvent: Message) {
         const userId = messageEvent.author.id;
-        const activity = this.activityMap[userId];
+        const activity = MessageTracker.activityMap[userId];
         const channels = activity.channels;
         const channelId = messageEvent.channelId;
 
@@ -30,32 +32,32 @@ export class MessageTracker {
 
     private spamDetected(messageEvent: Message, userId: string){
         const messageTimestamp = messageEvent.createdTimestamp;
-        const lastMessageTimestamp = this.activityMap[userId].state.lastMessageTimestamp;
+        const lastMessageTimestamp = MessageTracker.activityMap[userId].state.lastMessageTimestamp;
         const spamSpecification = new MessageSpamSpecification(lastMessageTimestamp);
         return spamSpecification.isSatisfiedBy(messageTimestamp);
     }
 
-    private initializeActivity(): MessageActivity{
+    private static initializeActivity(): MessageActivity{
         return {
             state: {
-                lastMessageTimestamp: Date.now()
+                lastMessageTimestamp: 0
             },
             channels: {}
         }
     }
 
     private handleNewUser(userId: string) {
-        if (this.activityMap[userId] == null) {
-            this.activityMap[userId] = this.initializeActivity();
+        if (MessageTracker.activityMap[userId] == null) {
+            MessageTracker.activityMap[userId] = MessageTracker.initializeActivity();
         }
     }
 
     public getData(){
-        return this.activityMap;
+        return MessageTracker.activityMap;
     }
 
     public resetCounters(){
-        const activities: MessageActivity[] = Object.values(this.activityMap);
+        const activities: MessageActivity[] = Object.values(MessageTracker.activityMap);
         for (let activity of activities){
             activity.channels = {};
         }

@@ -13,6 +13,7 @@ import {Utils} from "../../utils/Utils";
 import {Logger} from "../../utils/Logger";
 import {AxiosResponse} from "axios";
 import {SemperStandardResponse} from "../../@types/API";
+import {Message} from "discord.js";
 
 export class ActivityCompiler {
 
@@ -37,8 +38,18 @@ export class ActivityCompiler {
         }
     }
 
-    private callSuccessful(response: AxiosResponse<SemperStandardResponse, any>) {
+    private oldAPISuccess(response: AxiosResponse<SemperStandardResponse, any>){
         return response.data.statusId === 1;
+    }
+
+    //New API has no statusId and fails through HTTP status code, meaning if it reaches this point, we are successful.
+    //Therefore, we only have to confirm, that we are in fact, using the new API.
+    private newAPISuccess(response: AxiosResponse<SemperStandardResponse, any>){
+        return response.data.statusId == null;
+    }
+
+    private callSuccessful(response: AxiosResponse<SemperStandardResponse, any>) {
+        return this.oldAPISuccess(response) || this.newAPISuccess(response);
     }
 
     private countTotalMessages(stats: UserActivity[]) {
@@ -63,7 +74,6 @@ export class ActivityCompiler {
 
     private handleResponse(response: AxiosResponse, stats: UserActivity[]) {
         if (this.callSuccessful(response)) {
-            Logger.debug(JSON.stringify(response));
             this.createDiscordNotification(stats);
             return true;
         } else {
@@ -150,18 +160,30 @@ export class ActivityCompiler {
         return data;
     }
 
+    /*private getChannelList(messageEntry: MessageActivity | null, voiceEntry: VoiceActivity | null): string[] {
+        if (messageEntry != null && voiceEntry != null){
+           return this.buildChannelList(messageEntry.channels, voiceEntry.channels);
+        } else if (messageEntry != null){
+            return Object.keys(messageEntry.channels);
+        } else if (voiceEntry != null){
+            return Object.keys(voiceEntry.channels);
+        } else {
+            return [];
+        }
+    }*/
+
     private mergeDataForUser(userId: string, messageData: MessageActivityMap, voiceData: VoiceActivityMap) {
-        const messageEntry = messageData[userId];
-        const voiceEntry = voiceData[userId];
+        const messageEntry = messageData[userId] ? messageData[userId] : MessageTracker.EMPTY_MESSAGE_ACTIVITY;
+        const voiceEntry = voiceData[userId] ? voiceData[userId] : VoiceTracker.EMPTY_VOICE_ACTIVITY;
         const channelList = this.buildChannelList(messageEntry.channels, voiceEntry.channels);
         return this.buildDataObject(channelList, voiceEntry, messageEntry, userId);
     }
 
     private buildStatisticObject(userList: string[], messageData: MessageActivityMap, voiceData: VoiceActivityMap) {
-        const data: UserActivity[] = [];
+        let data: UserActivity[] = [];
         for (let userId of userList) {
             let userData = this.mergeDataForUser(userId, messageData, voiceData);
-            data.concat(userData);
+            data = data.concat(userData);
         }
         return data;
     }
@@ -193,7 +215,7 @@ export class ActivityCompiler {
         setTimeout(() => {
             this.databaseClient.sendUserStats(data)
                 .then((response: AxiosResponse) => {
-                    if (response.data.statusId === 1) {
+                    if (this.callSuccessful(response)) {
                         Logger.bot(`Attempt to resend data successful`);
                     } else {
                         Logger.bot(`Failed to send statistics twice. Data could not be sent`);

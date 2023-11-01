@@ -6,7 +6,9 @@ import {VoiceActivity, VoiceActivityMap} from "../../@types/types";
 
 export class VoiceTracker {
 
-    private activityMap: VoiceActivityMap = {};
+    public static readonly EMPTY_VOICE_ACTIVITY: VoiceActivity = VoiceTracker.initializeActivity();
+
+    private static activityMap: VoiceActivityMap = {};
 
     public handleVoiceEvent(oldMember: VoiceState, newMember: VoiceState): void {
 
@@ -45,7 +47,7 @@ export class VoiceTracker {
     }
 
     private registerVoiceLeave(oldMember: VoiceState) {
-        const userActivity = this.activityMap[oldMember.id];
+        const userActivity = VoiceTracker.activityMap[oldMember.id];
         const currentVoiceChannel = userActivity.state.currentVoiceChannel;
 
         if (currentVoiceChannel == null) {
@@ -68,7 +70,7 @@ export class VoiceTracker {
     }
 
     private registerUserMute(newMember: VoiceState) {
-        let userActivity = this.activityMap[newMember.id];
+        let userActivity = VoiceTracker.activityMap[newMember.id];
         if (userActivity.state.currentVoiceChannel != null){
             this.registerVoiceLeave(newMember);
         }
@@ -77,7 +79,7 @@ export class VoiceTracker {
 
     private registerVoiceEnter(newMember: VoiceState) {
         if (newMember.channelId != null) {
-            let userActivity = this.activityMap[newMember.id];
+            let userActivity = VoiceTracker.activityMap[newMember.id];
             userActivity.state.lastVoiceUpdate = Date.now();
             userActivity.state.currentVoiceChannel = newMember.channelId;
             Logger.info("Voice entered");
@@ -113,8 +115,8 @@ export class VoiceTracker {
 
     private handleNewEntry(oldMember: VoiceState) {
         const userId = oldMember.id;
-        if (this.activityMap[userId] == null) {
-            this.activityMap[userId] = this.initializeActivity();
+        if (VoiceTracker.activityMap[userId] == null) {
+            VoiceTracker.activityMap[userId] = VoiceTracker.initializeActivity();
             this.handleVoiceActivityOnBotStart(oldMember);
         }
     }
@@ -122,11 +124,11 @@ export class VoiceTracker {
     private handleVoiceActivityOnBotStart(oldMember: VoiceState) {
         const userIsNotMutedSpecification = new UserNotMutedSpecification();
         if (this.wasInChannel(oldMember) && userIsNotMutedSpecification.isSatisfiedBy(oldMember)) {
-            this.activityMap[oldMember.id].state.lastVoiceUpdate = Discord.startupTime;
+            VoiceTracker.activityMap[oldMember.id].state.lastVoiceUpdate = Discord.startupTime;
         }
     }
 
-    private initializeActivity(): VoiceActivity{
+    private static initializeActivity(): VoiceActivity{
         return {
             state: {
                 lastVoiceUpdate: Date.now(),
@@ -137,11 +139,11 @@ export class VoiceTracker {
     }
 
     public getData(){
-        return this.activityMap;
+        return VoiceTracker.activityMap;
     }
 
     public resetCounters(){
-        const activities = Object.values(this.activityMap);
+        const activities = Object.values(VoiceTracker.activityMap);
         for (let activity of activities){
             activity.channels = {};
             if (activity.state.currentVoiceChannel != null){

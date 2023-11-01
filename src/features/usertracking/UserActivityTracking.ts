@@ -23,7 +23,7 @@ export class UserActivityTracking {
     private statisticsAreTransmitted = false;
     private messageEvents: Message[] = [];
     private voiceEvents: any[] = [];
-    private hourOfLastCall: number = 0;
+    private static hourOfLastCall: number = this.getCurrentHour();
 
     public async registerMessage(messageEvent: Message) {
         if (this.statisticsAreTransmitted) {
@@ -59,25 +59,28 @@ export class UserActivityTracking {
     }
 
     private updateHourOfLastCall() {
-        this.hourOfLastCall = new Date().getHours();
+        UserActivityTracking.hourOfLastCall = UserActivityTracking.getCurrentHour();
     }
 
     private async handleAPICall() {
         await this.performUploadProcess();
-        await this.executeCachedEvents();
         this.updateHourOfLastCall();
+        await this.executeCachedEvents();
     }
 
     private async executeCachedEvents() {
-        this.messageEvents.forEach(this.registerMessage);
+        this.messageEvents.forEach(entry => this.registerMessage(entry));
         this.messageEvents = [];
         this.voiceEvents.forEach(entry => this.registerVoiceUpdate(entry[0], entry[1]));
         this.voiceEvents = [];
     }
 
     private isNewHour() {
-        let currentHour = new Date().getMinutes();
-        return this.hourOfLastCall !== currentHour;
+        return UserActivityTracking.hourOfLastCall !== UserActivityTracking.getCurrentHour();
+    }
+
+    private static getCurrentHour(){
+        return new Date().getMinutes();
     }
 
     private handleMessageEvent(messageEvent: Message) {
