@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "outDir": "./built",
+    "typeRoots": ["src/@types", "node_modules/@types"],
+    "allowJs": true,
+    "target": "es2020",
+    "module": "CommonJS",
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "alwaysStrict": true,
+    "sourceMap": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    //    "noUnusedLocals": true,
+    "pretty": true
+  },
+  "include": ["./src/**/*"],
+}
