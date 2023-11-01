@@ -22,6 +22,9 @@ export class LoadServerData {
             Channels.initialize();
             if (!Utils.arrayIsEmpty(result.data)){
                 Channels.idList = result.data;
+            } else {
+                //old API
+                Channels.idList = result.data.channelData;
             }
         }).catch(error => Logger.error(error));
     }
