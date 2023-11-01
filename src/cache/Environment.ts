@@ -8,6 +8,8 @@ export class Environment {
     public static readonly API_ACCESS_TOKEN = Environment.handleValue(process.env.API_ACCESS_TOKEN);
     public static readonly API_TOKEN_HEADER = Environment.handleValue(process.env.API_TOKEN_HEADER);
     public static readonly LOG_CHANNEL = Environment.handleValue(process.env.LOG_CHANNEL);
+    public static readonly SEMPER_RED_LOG_LEVEL = Environment.handleValue(process.env.SEMPER_RED_LOG_LEVEL);
+    public static readonly SEMPER_RED_LOG_TOOL = Environment.handleValue(process.env.SEMPER_RED_LOG_TOOL);
 
     private static handleValue(value: string | undefined) {
         return value != null ? value : "";
