@@ -92,7 +92,7 @@ export class ActivityCompiler {
     private handleOngoingVoiceActivity(voiceData: VoiceActivityMap) {
         for (let activity of Object.values(voiceData)) {
             let currentChannel = activity.state.currentVoiceChannel;
-            if (currentChannel != null) {
+            if (!Utils.stringIsEmpty(currentChannel)) {
                 this.addTimeSinceLastUpdateToVoiceCounter(activity, currentChannel);
             }
         }
